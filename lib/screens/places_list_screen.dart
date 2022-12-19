@@ -39,7 +39,13 @@ class PlacesListScreen extends StatelessWidget {
                             ),
                           ),
                           title: Text(greatplaces.getItems(i).title),
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.of(context).pushNamed(
+                                AppRoutes.PLACE_DETAIL,
+                                arguments: greatplaces.getItems(i));
+                          },
+                          subtitle: Text(greatplaces.getItems(i).location.addres
+                              as String),
                         ),
                       ),
               )),

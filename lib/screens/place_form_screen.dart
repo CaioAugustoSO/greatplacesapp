@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:greatplaces/providers/great_places.dart';
 import 'package:greatplaces/widgets/image_input.dart';
 import 'package:greatplaces/widgets/location_input.dart';
@@ -18,17 +19,36 @@ class _PlacesFormScreenState extends State<PlacesFormScreen> {
 
   File? _pickedImage;
 
+  LatLng? _pickedPosition;
+
   void _selectImage(File pickedImage) {
-    _pickedImage = pickedImage;
+    setState(() {
+      _pickedImage = pickedImage;
+    });
+  }
+
+  void _selectPosition(LatLng position) {
+    setState(() {
+      _pickedPosition = position;
+    });
+  }
+
+  bool _isvalidForm() {
+    return _titleController.text.isNotEmpty &&
+        _pickedImage != null &&
+        _pickedPosition != null;
   }
 
   void _submitForm() {
-    if (_titleController.text.isEmpty || _pickedImage == null) {
+    if (!_isvalidForm()) {
       return;
     }
 
-    Provider.of<GreatPlaces>(context, listen: false)
-        .addPlaces(_titleController.text, _pickedImage!);
+    Provider.of<GreatPlaces>(context, listen: false).addPlaces(
+      _titleController.text,
+      _pickedImage!,
+      _pickedPosition!,
+    );
 
     Navigator.of(context).pop();
   }
@@ -45,22 +65,24 @@ class _PlacesFormScreenState extends State<PlacesFormScreen> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(10),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: _titleController,
-                    decoration: InputDecoration(labelText: 'Título'),
-                  ),
-                  SizedBox(height: 10),
-                  ImageInput(_selectImage),
-                  SizedBox(height: 10),
-                  LocationInput(),
-                ],
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _titleController,
+                      decoration: InputDecoration(labelText: 'Título'),
+                    ),
+                    SizedBox(height: 10),
+                    ImageInput(_selectImage),
+                    SizedBox(height: 10),
+                    LocationInput(_selectPosition),
+                  ],
+                ),
               ),
             ),
           ),
           ElevatedButton.icon(
-            onPressed: _submitForm,
+            onPressed: _isvalidForm() ? _submitForm : null,
             icon: Icon(Icons.add),
             label: Text('Add'),
             style: ElevatedButton.styleFrom(
